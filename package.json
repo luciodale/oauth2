@@ -5,17 +5,12 @@
   "module": "dist/luciodale-oauth2.esm.js",
   "license": "MIT",
   "scripts": {
-    "build": "npx @preconstruct/cli build",
-    "dev": "npx @preconstruct/cli dev",
-    "watch": "npx @preconstruct/cli watch",
-    "postinstall": "npx @preconstruct/cli dev",
-    "release": "npx @preconstruct/cli build && yarn login && yarn publish --access public"
+    "build": "preconstruct build",
+    "release": "preconstruct build && yarn login && yarn publish --access public"
   },
   "devDependencies": {
     "@preconstruct/cli": "^2.3.0",
-    "typescript": "^5.0.2"
-  },
-  "dependencies": {
+    "typescript": "^5.0.2",
     "@babel/preset-typescript": "^7.21.0"
   }
 }
