@@ -1,10 +1,22 @@
 import { generateRandomString, pkceChallengeFromVerifier } from "./utils";
 
-async function authorization_code_request_info({
+export type AuthorizationCodeRequestInfoProps = {
+  authorization_endpoint: string;
+  client_id: string;
+  redirect_uri: string;
+};
+
+export type AuthorizationCodeRequestInfoReturn = {
+  url: string;
+  state: string;
+  code_verifier: string;
+};
+
+async function authorizationCodeRequestInfo({
   authorization_endpoint,
   client_id,
   redirect_uri,
-}) {
+}: AuthorizationCodeRequestInfoProps): Promise<AuthorizationCodeRequestInfoReturn> {
   const state = generateRandomString();
 
   const code_verifier = generateRandomString();
@@ -25,30 +37,37 @@ async function authorization_code_request_info({
   };
 }
 
-async function postMessageToWorker(obj) {
+async function postMessageToWorker<T extends { type: string }>(
+  obj: T
+): Promise<void> {
   const registration = await navigator.serviceWorker.ready;
   const serviceWorker = registration.active;
-  serviceWorker.postMessage(obj);
+  serviceWorker?.postMessage(obj);
 }
 
-export function exchangeCodeForAccessToken({ query_params }) {
-  const state1 = localStorage.getItem("pkce_state");
-  const state2 = query_params.get("state");
+export function exchangeCodeForAccessToken({
+  query_params,
+}: {
+  query_params: URLSearchParams;
+}): Promise<Response> | undefined {
+  const storedState = localStorage.getItem("pkce_state");
+  const queryParamState = query_params.get("state");
   const code = query_params.get("code");
 
-  if (!code || !state2) {
+  if (!code || !queryParamState) {
     console.log("No code or state in query params");
     return;
   }
 
-  if (state1 !== state2) {
-    console.error("State mismatch");
-    return;
+  if (storedState !== queryParamState) {
+    throw new Error(
+      "exchangeCodeForAccessToken mismatch betweewn stored state and query param state"
+    );
   }
 
-  const redirect_uri = localStorage.getItem("oauth2_redirect_uri");
-  const client_id = localStorage.getItem("oauth2_client_id");
-  const code_verifier = localStorage.getItem("pkce_code_verifier");
+  const redirect_uri = localStorage.getItem("oauth2_redirect_uri") || "";
+  const client_id = localStorage.getItem("oauth2_client_id") || "";
+  const code_verifier = localStorage.getItem("pkce_code_verifier") || "";
 
   const payload_params = new URLSearchParams({
     grant_type: "authorization_code",
@@ -58,7 +77,7 @@ export function exchangeCodeForAccessToken({ query_params }) {
     code_verifier: code_verifier,
   });
 
-  const token_endpoint = localStorage.getItem("oauth2_token_endpoint");
+  const token_endpoint = localStorage.getItem("oauth2_token_endpoint") || "";
 
   return fetch(token_endpoint, {
     method: "POST",
@@ -70,14 +89,23 @@ export function exchangeCodeForAccessToken({ query_params }) {
   });
 }
 
-export async function authorize(config) {
+export type Config = {
+  origin: string;
+  client_id: string;
+  redirect_uri: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  requested_scopes: string[];
+};
+
+export async function authorize(config: Config): Promise<void> {
   // store config in service worker
   postMessageToWorker({
     type: "storeConfig",
     config,
   });
 
-  const { url, state, code_verifier } = await authorization_code_request_info(
+  const { url, state, code_verifier } = await authorizationCodeRequestInfo(
     config
   );
   localStorage.setItem("pkce_state", state);
@@ -88,7 +116,7 @@ export async function authorize(config) {
   window.location.href = url;
 }
 
-export async function useOAuth2() {
+export async function useOAuth2(): Promise<void> {
   await navigator.serviceWorker.register("./service-worker.js");
 
   // we need this as a workaround to the fact that the service worker doesn't kick in with a hard refresh
