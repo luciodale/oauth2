@@ -1,6 +1,6 @@
 {
   "name": "@luciodale/oauth2",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/luciodale-oauth2.cjs.js",
   "module": "dist/luciodale-oauth2.esm.js",
   "license": "MIT",
