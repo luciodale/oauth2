@@ -1,6 +1,6 @@
 {
   "name": "@luciodale/oauth2",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "dist/luciodale-oauth2.cjs.js",
   "module": "dist/luciodale-oauth2.esm.js",
   "license": "MIT",
@@ -9,8 +9,8 @@
     "release": "preconstruct build && yarn login && yarn publish --access public"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.21.0",
     "@preconstruct/cli": "^2.3.0",
-    "typescript": "^5.0.2",
-    "@babel/preset-typescript": "^7.21.0"
+    "typescript": "^5.0.2"
   }
 }
