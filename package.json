@@ -5,11 +5,11 @@
   "module": "dist/luciodale-oauth2.esm.js",
   "license": "MIT",
   "scripts": {
-    "build": "preconstruct build",
-    "dev": "preconstruct dev",
-    "watch": "preconstruct watch",
-    "postinstall": "preconstruct dev",
-    "release": "preconstruct build && yarn login && yarn publish --access public"
+    "build": "npx preconstruct build",
+    "dev": "npx preconstruct dev",
+    "watch": "npx preconstruct watch",
+    "postinstall": "npx preconstruct dev",
+    "release": "npx preconstruct build && yarn login && yarn publish --access public"
   },
   "devDependencies": {
     "@preconstruct/cli": "^2.3.0",
