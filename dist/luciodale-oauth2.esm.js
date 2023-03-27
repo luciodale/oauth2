@@ -66,7 +66,7 @@ function exchangeCodeForAccessToken({
     return;
   }
   if (storedState !== queryParamState) {
-    throw new Error("exchangeCodeForAccessToken mismatch betweewn stored state and query param state");
+    throw new Error("exchangeCodeForAccessToken mismatch between stored state and query param state");
   }
   const redirect_uri = localStorage.getItem("oauth2_redirect_uri") || "";
   const client_id = localStorage.getItem("oauth2_client_id") || "";
@@ -79,7 +79,7 @@ function exchangeCodeForAccessToken({
     code_verifier: code_verifier
   });
   const token_endpoint = localStorage.getItem("oauth2_token_endpoint") || "";
-  return fetch(token_endpoint, {
+  fetch(token_endpoint, {
     method: "POST",
     headers: new Headers({
       "Content-Type": "application/x-www-form-urlencoded"
@@ -87,6 +87,7 @@ function exchangeCodeForAccessToken({
     body: payload_params,
     credentials: "include"
   });
+  window.close();
 }
 async function authorize(config) {
   // store config in service worker
@@ -104,11 +105,10 @@ async function authorize(config) {
   localStorage.setItem("oauth2_client_id", config.client_id);
   localStorage.setItem("oauth2_token_endpoint", config.token_endpoint);
   localStorage.setItem("oauth2_redirect_uri", config.redirect_uri);
-  window.location.href = url;
+  window.open(url);
 }
 async function useOAuth2() {
   await navigator.serviceWorker.register("./service-worker.js");
-
   // we need this as a workaround to the fact that the service worker doesn't kick in with a hard refresh
   !navigator.serviceWorker.controller && location.reload();
 }

@@ -10,6 +10,8 @@ addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
 });
 
+const tokenExpirationStore = new Map();
+const refreshTokenStore = new Map();
 const tokenStore = new Map();
 const configStore = new Map();
 
@@ -27,22 +29,57 @@ self.addEventListener("message", (event) => {
   }
 });
 
+function refreshToken(configItem) {
+  const refreshToken = refreshTokenStore.get(configItem.origin);
+
+  const headers = new Headers();
+  headers.set("Content-Type", "application/x-www-form-urlencoded");
+  const body = new URLSearchParams();
+  body.set("grant_type", "refresh_token");
+  body.set("refresh_token", refreshToken);
+
+  return fetch(configItem.token_endpoint, {
+    method: "POST",
+    headers,
+    body,
+  });
+}
+
+function createHeaders(headers, accessToken) {
+  const newHeaders = new Headers(headers);
+  if (!newHeaders.has("Authorization")) {
+    newHeaders.set("Authorization", `Bearer ${accessToken}`);
+  }
+  return newHeaders;
+}
+
 // to intercept the request and add the access token to the Authorization header when hitting the protected resource URL.
 async function attachBearerToken(request, _clientId) {
   const { origin } = new URL(request.url);
+
+  console.log("url", request.url);
 
   const configItem = configStore.get(origin);
   if (!configItem) {
     return request;
   }
 
-  const accessToken = tokenStore.get(configItem.origin);
+  if (tokenStore.get(configItem.origin)) {
+    const { expires_in, date } = tokenExpirationStore.get(configItem.origin);
 
-  if (accessToken) {
-    const headers = new Headers(request.headers);
-    if (!headers.has("Authorization")) {
-      headers.set("Authorization", `Bearer ${accessToken}`);
+    console.log("old token", tokenStore.get(configItem.origin));
+
+    if (Date.now() - date > expires_in) {
+      await refreshToken(configItem);
     }
+
+    console.log("new token", tokenStore.get(configItem.origin));
+
+    const headers = createHeaders(
+      request.headers,
+      tokenStore.get(configItem.origin)
+    );
+
     return new Request(request, { headers });
   } else {
     return request;
@@ -65,9 +102,15 @@ const modifyResponse = async (response) => {
     return response;
   }
 
-  const { access_token, ...payload } = await response.json();
+  const { access_token, refresh_token, expires_in, ...payload } =
+    await response.json();
 
   tokenStore.set(configItem.origin, access_token);
+  refreshTokenStore.set(configItem.origin, refresh_token);
+  tokenExpirationStore.set(configItem.origin, {
+    expires_in: payload.expires_in,
+    date: Date.now(),
+  });
 
   return new Response(JSON.stringify(payload, null, 2), {
     headers: response.headers,

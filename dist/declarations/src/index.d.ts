@@ -10,7 +10,7 @@ export type AuthorizationCodeRequestInfoReturn = {
 };
 export declare function exchangeCodeForAccessToken({ query_params, }: {
     query_params: URLSearchParams;
-}): Promise<Response> | undefined;
+}): undefined;
 export type Config = {
     origin: string;
     client_id: string;

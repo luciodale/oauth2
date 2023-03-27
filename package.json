@@ -6,11 +6,13 @@
   "license": "MIT",
   "scripts": {
     "build": "preconstruct build",
+    "watch": "chokidar 'src/**/*' -c 'yarn build'",
     "release": "preconstruct build && yarn publish --access public"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.21.0",
     "@preconstruct/cli": "^2.3.0",
+    "chokidar-cli": "^3.0.0",
     "typescript": "^5.0.2"
   }
 }
