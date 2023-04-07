@@ -53,27 +53,40 @@ function createHeaders(headers, accessToken) {
   return newHeaders;
 }
 
+async function handleTokenResponse(response, configItem) {
+  const { access_token, refresh_token, expires_in } = await response.json();
+
+  tokenStore.set(configItem.origin, access_token);
+  refreshTokenStore.set(configItem.origin, refresh_token);
+  tokenExpirationStore.set(configItem.origin, {
+    expires_in,
+    date: Date.now(),
+  });
+}
+
 // to intercept the request and add the access token to the Authorization header when hitting the protected resource URL.
 async function attachBearerToken(request, _clientId) {
   const { origin } = new URL(request.url);
 
-  console.log("url", request.url);
-
   const configItem = configStore.get(origin);
-  if (!configItem) {
+  if (!configItem || configItem.token_endpoint === request.url) {
     return request;
   }
 
   if (tokenStore.get(configItem.origin)) {
     const { expires_in, date } = tokenExpirationStore.get(configItem.origin);
 
-    console.log("old token", tokenStore.get(configItem.origin));
-
     if (Date.now() - date > expires_in) {
-      await refreshToken(configItem);
+      try {
+        const response = await refreshToken(configItem);
+        await handleTokenResponse(response, configItem);
+      } catch (e) {
+        console.err(
+          "Something went wrong while trying to refetch the access token:",
+          e
+        );
+      }
     }
-
-    console.log("new token", tokenStore.get(configItem.origin));
 
     const headers = createHeaders(
       request.headers,
@@ -102,17 +115,9 @@ const modifyResponse = async (response) => {
     return response;
   }
 
-  const { access_token, refresh_token, expires_in, ...payload } =
-    await response.json();
+  await handleTokenResponse(response, configItem);
 
-  tokenStore.set(configItem.origin, access_token);
-  refreshTokenStore.set(configItem.origin, refresh_token);
-  tokenExpirationStore.set(configItem.origin, {
-    expires_in: payload.expires_in,
-    date: Date.now(),
-  });
-
-  return new Response(JSON.stringify(payload, null, 2), {
+  return new Response({
     headers: response.headers,
     status: response.status,
     statusText: response.statusText,

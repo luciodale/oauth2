@@ -6,7 +6,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function generateRandomString() {
   const array = new Uint32Array(28);
   self.crypto.getRandomValues(array);
-  return Array.from(array, dec => ("0" + dec.toString(16)).substr(-2)).join("");
+  return Array.from(array, dec => ("0" + dec.toString(16)).substring(-2)).join("");
 }
 
 // Calculate the SHA256 hash of the input text.
@@ -17,19 +17,13 @@ function sha256(plain) {
   return self.crypto.subtle.digest("SHA-256", data);
 }
 
-// Base64-urlencodes the input string
-function base64urlencode(buffer) {
-  let bytes = Array.from(new Uint8Array(buffer));
-  let base64 = btoa(String.fromCharCode.apply(null, bytes));
-  let urlencoded = base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  return urlencoded;
-}
-
 // Return the base64-urlencoded sha256 hash for the PKCE
 // challenge
 async function pkceChallengeFromVerifier(v) {
   const hashed = await sha256(v);
-  return base64urlencode(hashed);
+  let bytes = Array.from(new Uint8Array(hashed));
+  let base64 = window.btoa(String.fromCharCode.apply(null, bytes));
+  return base64;
 }
 
 async function authorizationCodeRequestInfo({
@@ -118,7 +112,6 @@ async function useOAuth2() {
     !navigator.serviceWorker.controller && location.reload();
   }).catch(error => console.log("Service worker registration failed: ", error));
 }
-console.log("aa.ts");
 
 exports.authorize = authorize;
 exports.exchangeCodeForAccessToken = exchangeCodeForAccessToken;
