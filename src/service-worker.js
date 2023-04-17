@@ -10,14 +10,15 @@ addEventListener("activate", (event) => {
   event.waitUntil(clients.claim());
 });
 
+// These Maps are indexed by the origin of the protected resource URLs.
+// There will be one entry in each Map for each protected resource URL,
+// which is provided by the user when calling the authenticate({...}) method.
 const tokenExpirationStore = new Map();
 const refreshTokenStore = new Map();
 const tokenStore = new Map();
 const configStore = new Map();
 
 self.addEventListener("message", (event) => {
-  console.log("new message received in worker:", event.data);
-
   const type = event.data.type;
 
   switch (type) {
@@ -47,6 +48,7 @@ function refreshToken(configItem) {
 
 function createHeaders(headers, accessToken) {
   const newHeaders = new Headers(headers);
+  // Only add the Authorization header if the user hasn't added a custom one for a given protected resource URL.
   if (!newHeaders.has("Authorization")) {
     newHeaders.set("Authorization", `Bearer ${accessToken}`);
   }
@@ -64,7 +66,9 @@ async function handleTokenResponse(response, configItem) {
   });
 }
 
-// to intercept the request and add the access token to the Authorization header when hitting the protected resource URL.
+// This function intercepts all requests, but only handles those directed to the protected resource URLs.
+// Particularly, it adds the Authorization header to the protected resource requests, a Bearer Token,
+// and asks for a new token if the current one has expired before sending the request.
 async function attachBearerToken(request, _clientId) {
   const { origin } = new URL(request.url);
 
@@ -107,7 +111,10 @@ function isTokenEndpoint(url) {
   }
 }
 
-const modifyResponse = async (response) => {
+// This function intercepts all responses, but only handles the ones from the token endpoint.
+// It stores the access token, refresh token, and expiration date in the corresponding Maps in memory,
+// and returns a new Response to the client without the body to avoid exposing the access token.
+async function storeBearerToken(response) {
   const url = response.url;
   const configItem = isTokenEndpoint(url);
 
@@ -122,13 +129,13 @@ const modifyResponse = async (response) => {
     status: response.status,
     statusText: response.statusText,
   });
-};
+}
 
 async function fetchWithBearerToken({ request, clientId }) {
   const newRequest =
     request instanceof Request ? request : new Request(request);
   const attachBearerTokenFn = await attachBearerToken(newRequest, clientId);
-  return fetch(attachBearerTokenFn).then(modifyResponse);
+  return fetch(attachBearerTokenFn).then(storeBearerToken);
 }
 
 addEventListener("fetch", (event) => {

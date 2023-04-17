@@ -18,7 +18,6 @@ async function authorizationCodeRequestInfo({
   redirect_uri,
 }: AuthorizationCodeRequestInfoProps): Promise<AuthorizationCodeRequestInfoReturn> {
   const state = generateRandomString();
-
   const code_verifier = generateRandomString();
   const code_challenge = await pkceChallengeFromVerifier(code_verifier);
 
