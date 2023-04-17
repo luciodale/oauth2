@@ -17,6 +17,6 @@
     "typescript": "^5.0.2"
   },
   "bin": {
-    "@luciodale/oauth2": "./init.js"
+    "init": "./init.js"
   }
 }
