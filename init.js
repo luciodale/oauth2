@@ -36,10 +36,10 @@ console.log(
 );
 
 function copyFile(buildPath) {
-  const serviceWorkerFilename = path.basename(buildPath);
-  const swDestFilepath = path.resolve(absolutePublicDir, serviceWorkerFilename);
+  const fileName = path.basename(buildPath);
+  const destinationFilePath = path.resolve(absolutePublicDir, fileName);
 
-  fs.copyFileSync(SERVICE_WORKER_BUILD_PATH, swDestFilepath);
+  fs.copyFileSync(buildPath, destinationFilePath);
 }
 
 copyFile(SERVICE_WORKER_BUILD_PATH);
