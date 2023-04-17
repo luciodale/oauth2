@@ -101,12 +101,12 @@ async function authorize(config) {
   localStorage.setItem("oauth2_redirect_uri", config.redirect_uri);
   window.open(url);
 }
-async function useOAuth2() {
-  await navigator.serviceWorker.register("./service-worker.js").then(() => {
+async function registerOAuth2Worker() {
+  await navigator.serviceWorker.register("./oauth-service-worker.js").then(() => {
     console.log("Service worker registered");
     // we need this as a workaround to the fact that the service worker doesn't kick in with a hard refresh
     !navigator.serviceWorker.controller && location.reload();
   }).catch(error => console.log("Service worker registration failed: ", error));
 }
 
-export { authorize, exchangeCodeForAccessToken, useOAuth2 };
+export { authorize, exchangeCodeForAccessToken, registerOAuth2Worker };

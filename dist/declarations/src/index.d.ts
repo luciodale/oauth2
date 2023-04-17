@@ -20,4 +20,4 @@ export type Config = {
     requested_scopes: string[];
 };
 export declare function authorize(config: Config): Promise<void>;
-export declare function useOAuth2(): Promise<void>;
+export declare function registerOAuth2Worker(): Promise<void>;

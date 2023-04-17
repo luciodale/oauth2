@@ -2,20 +2,20 @@
 const fs = require("fs");
 const path = require("path");
 
-const SERVICE_WORKER_SOURCE_PATH = path.resolve(
+const SERVICE_WORKER_BUILD_PATH = path.resolve(
   __dirname,
-  "../",
-  "src/service-worker.js"
+  "src/oauth-service-worker.js"
+);
+
+const REDIRECT_HTML_BUILD_PATH = path.resolve(
+  __dirname,
+  "src/oauth-redirect.html"
 );
 
 const CWD = process.cwd();
-
 const args = process.argv.slice(2);
+const publicDir = args[0] || "./public";
 
-console.log("source pathhhhh", SERVICE_WORKER_SOURCE_PATH);
-process.exit(1);
-
-const publicDir = "public";
 // When running as a part of "postinstall" script, "cwd" equals the library's directory.
 // The "postinstall" script resolves the right absolute public directory path.
 const absolutePublicDir = path.isAbsolute(publicDir)
@@ -31,13 +31,19 @@ if (!dirExists) {
 }
 
 console.log(
-  'Initializing the Mock Service Worker at "%s"...',
+  'Initializing the OAuth2 Service Worker at "%s"...',
   absolutePublicDir
 );
 
-const serviceWorkerFilename = path.basename(SERVICE_WORKER_BUILD_PATH);
-const swDestFilepath = path.resolve(absolutePublicDir, serviceWorkerFilename);
+function copyFile(buildPath) {
+  const serviceWorkerFilename = path.basename(buildPath);
+  const swDestFilepath = path.resolve(absolutePublicDir, serviceWorkerFilename);
 
-fs.copyFileSync(SERVICE_WORKER_BUILD_PATH, swDestFilepath);
+  fs.copyFileSync(SERVICE_WORKER_BUILD_PATH, swDestFilepath);
+}
 
-console.log("Service Worker successfully created!");
+copyFile(SERVICE_WORKER_BUILD_PATH);
+console.log("oauth-service-worker successfully created!");
+
+copyFile(REDIRECT_HTML_BUILD_PATH);
+console.log("oauth-redirect.html successfully created!");
