@@ -1,6 +1,6 @@
 {
   "name": "@luciodale/oauth2",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "dist/luciodale-oauth2.cjs.js",
   "module": "dist/luciodale-oauth2.esm.js",
   "license": "MIT",
@@ -12,9 +12,9 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.21.0",
+    "@open-draft/until": "^2.0.0",
     "@preconstruct/cli": "^2.3.0",
-    "typescript": "^5.0.2",
-    "@open-draft/until": "^2.0.0"
+    "typescript": "^5.0.2"
   },
   "bin": {
     "@luciodale/oauth2": "./init.js"
