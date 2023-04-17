@@ -7,11 +7,16 @@
   "scripts": {
     "build": "preconstruct build",
     "watch": "preconstruct watch",
-    "release": "preconstruct build && yarn publish --access public"
+    "release": "preconstruct build && yarn publish --access public",
+    "cli": "node ./init.js"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.21.0",
     "@preconstruct/cli": "^2.3.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "@open-draft/until": "^2.0.0"
+  },
+  "bin": {
+    "@luciodale/oauth2": "./init.js"
   }
 }
