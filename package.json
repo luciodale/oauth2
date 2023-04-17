@@ -12,7 +12,6 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.21.0",
-    "@open-draft/until": "^2.0.0",
     "@preconstruct/cli": "^2.3.0",
     "typescript": "^5.0.2"
   },

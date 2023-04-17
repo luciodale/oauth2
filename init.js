@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 const fs = require("fs");
 const path = require("path");
-const { until } = require("@open-draft/until");
 
 const SERVICE_WORKER_SOURCE_PATH = path.resolve(
   __dirname,
