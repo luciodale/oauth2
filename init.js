@@ -14,7 +14,7 @@ const REDIRECT_HTML_BUILD_PATH = path.resolve(
 
 const CWD = process.cwd();
 const args = process.argv.slice(2);
-const publicDir = args[0] || "./public";
+const publicDir = args[1] || "./public";
 
 // When running as a part of "postinstall" script, "cwd" equals the library's directory.
 // The "postinstall" script resolves the right absolute public directory path.
