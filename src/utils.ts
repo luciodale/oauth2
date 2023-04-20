@@ -1,6 +1,6 @@
 // Generate a secure random string using the browser crypto functions
 export function generateRandomString(): string {
-  const array = new Uint32Array(28);
+  const array = new Uint32Array(14);
   self.crypto.getRandomValues(array);
   return Array.from(array, (dec) =>
     ("0" + dec.toString(16)).substring(-2)
