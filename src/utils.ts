@@ -15,11 +15,19 @@ function sha256(plain: string): Promise<ArrayBuffer> {
   return self.crypto.subtle.digest("SHA-256", data);
 }
 
+// Base64-urlencodes the input string
+function base64UrlEncode(str: string): string {
+  let bytes = Array.from(new Uint8Array(str));
+  let base64 = window.btoa(String.fromCharCode.apply(null, bytes));
+  return base64
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
 // Return the base64-urlencoded sha256 hash for the PKCE
 // challenge
 export async function pkceChallengeFromVerifier(v: string) {
   const hashed = await sha256(v);
-  let bytes = Array.from(new Uint8Array(hashed));
-  let base64 = window.btoa(String.fromCharCode.apply(null, bytes));
-  return base64;
+  return base64UrlEncode(hashed);
 }
